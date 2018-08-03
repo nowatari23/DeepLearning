@@ -1,0 +1,9 @@
+﻿  NeuralNet.cpp
+  main.cpp
+  コード生成しています。
+  94 of 1220 functions ( 7.7%) were compiled, the rest were copied from previous compilation.
+    37 functions were new in current compilation
+    97 functions had inline decision re-evaluated but remain unchanged
+  コード生成が終了しました。
+  othello.vcxproj -> C:\Users\貴裕\othello\Release\othello.exe
+  othello.vcxproj -> C:\Users\貴裕\othello\Release\othello.pdb (Full PDB)
