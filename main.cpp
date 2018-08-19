@@ -13,7 +13,7 @@
 
 #include "resource.h"
 
-#include "NeuralNet.h"
+#include "NeuralNetTest/NeuralNet.h"
 #include "teacherData.h"
 
 #define APP_NAME TEXT("Othello")
@@ -84,7 +84,7 @@ static void format(void)
 		for (int y = 0; y < BOARD_SIZE; ++y)
 			board[x][y] = EMPTY;
 	}
-  
+
 	/* 最初の４枚を配置する */
 	board[BOARD_SIZE/2-1][BOARD_SIZE/2-1]	= board[BOARD_SIZE/2][BOARD_SIZE/2]
 											= BLACK;
@@ -112,7 +112,7 @@ static int subCheck(int (*pBoard)[BOARD_SIZE][BOARD_SIZE],
 
 	disbw	= SwapBW(bw);
 	count	= 0;
-	
+
 	for (int x = fX, y = fY;
 		 (x >= 0 && x < BOARD_SIZE)
 	  && (y >= 0 && y < BOARD_SIZE);
@@ -123,11 +123,11 @@ static int subCheck(int (*pBoard)[BOARD_SIZE][BOARD_SIZE],
 		{
 			if (count == 0)
 				break;
-			
+
 			if ((abs(x - fX) != count)
 			&&  (abs(y - fY) != count))
 				break;
-			
+
 			for (int i = fX, j = fY ;
 				 i != x || j != y;
 				 i += dX, j += dY)
@@ -151,7 +151,7 @@ static int subCheck(int (*pBoard)[BOARD_SIZE][BOARD_SIZE],
 }
 
 /*----------------------------------------------------------------------
- * おける場所を調べてひっくり返す関数 
+ * おける場所を調べてひっくり返す関数
  *----------------------------------------------------------------------*/
 static int check(int (*pBoard)[BOARD_SIZE][BOARD_SIZE],
 				 int bw,
@@ -170,11 +170,11 @@ static int check(int (*pBoard)[BOARD_SIZE][BOARD_SIZE],
 	/* 置いた位置が空じゃないとき */
 	if ((*pBoard)[x][y] != EMPTY)
 		return (0);
-  
+
 	//横に調べる
 	place	+= subCheck(pBoard, x+1, y  , +1,  0, bw);	//右に調べる
 	place	+= subCheck(pBoard, x-1, y  , -1,  0, bw);	//左に調べる
-	
+
 	//縦に調べる
 	place	+= subCheck(pBoard, x  , y+1,  0, +1, bw);	//下に調べる
 	place	+= subCheck(pBoard, x  , y-1,  0, -1, bw);	//上に調べる
@@ -207,7 +207,7 @@ static int preCheck(int bw)
 				++num;
 		}
 	}
-	
+
 	return (num);
 }
 
@@ -221,14 +221,14 @@ static int Cpu(int bw)
 		int		id;
 		double	ratio;
 	} putCandidacy_t;
-	
+
 	std::vector<putCandidacy_t>			array;
 	std::random_device					rd;
 	std::mt19937						mt(rd());
 	std::uniform_real_distribution<>	dist(0.0, 1.0);
 	double								total	= 0.0;
 	teacherLog_t						log;
-	
+
 	if (learn)
 	{
 		log.input.resize(BOARD_SIZE*BOARD_SIZE*2);
@@ -239,7 +239,7 @@ static int Cpu(int bw)
 			{
 				int	myID	= MakeID(x, y);
 				int	emyID	= myID + BOARD_SIZE*BOARD_SIZE;
-				
+
 				if (board[x][y] == EMPTY)
 				{
 					log.input[myID]		= 0.0;
@@ -271,7 +271,7 @@ static int Cpu(int bw)
 			{
 				int	myID	= MakeID(x, y);
 				int	emyID	= myID + BOARD_SIZE*BOARD_SIZE;
-				
+
 				if (board[x][y] == EMPTY)
 				{
 					input[myID]		= 0.0;
@@ -286,7 +286,7 @@ static int Cpu(int bw)
 				}
 			}
 		}
-		
+
 		Net.SetInput(input);
 		Net.Forward();
 		Net.GetOutput(output);
@@ -305,7 +305,7 @@ static int Cpu(int bw)
 						MakeID(x, y),
 						output[MakeID(x, y)],
 					};
-					
+
 					array.push_back(tmp);
 					total	+= tmp.ratio;
 				}
@@ -345,7 +345,7 @@ static int Cpu(int bw)
 			array[i].ratio /= total;
 	}
 	double	ratio	= dist(mt);
-	
+
 	for (auto a : array)
 	{
 		if (ratio < a.ratio)
@@ -356,12 +356,12 @@ static int Cpu(int bw)
 
 				bwLog[bw].push_back(log);
 			}
-			
+
 			return (a.id);
 		}
 		ratio -= a.ratio;
 	}
-	
+
 	return (0);
 }
 
@@ -443,7 +443,7 @@ static void Paint(HWND hWnd, HDC hdc)
 				  gridBase + gridSize * (comCursorX+1) + 1,
 				  gridBase + gridSize * (comCursorY+1) + 1);
 	}
-	
+
 	/* カーソルを書く*/
 	if (manCursorX >= 0 && manCursorX < BOARD_SIZE
 	&&  manCursorY >= 0 && manCursorY < BOARD_SIZE)
@@ -457,9 +457,9 @@ static void Paint(HWND hWnd, HDC hdc)
 				  gridBase + gridSize * (manCursorX+1) + 1,
 				  gridBase + gridSize * (manCursorY+1) + 1);
 	}
-	
+
 	SelectObject(hdc, GetStockObject(BLACK_PEN));
-	
+
 	for (int x = 0; x < BOARD_SIZE; ++x)
 	{
 		for (int y = 0; y < BOARD_SIZE; ++y)
@@ -476,7 +476,7 @@ static void Paint(HWND hWnd, HDC hdc)
 			  default:
 				continue;
 			}
-			
+
 
 			Ellipse(hdc,
 					(int)(gridSize * (x+0.5) - gridSize *0.4) + gridBase,
@@ -491,7 +491,7 @@ static void Paint(HWND hWnd, HDC hdc)
 			 TEXT("黒 %d : 白 %d  "),
 			 pieceNum[BLACK],
 			 pieceNum[WHITE]);
-	
+
 	TextOut(hdc,
 			gridBase*2 + gridSize * BOARD_SIZE,
 			0,
@@ -505,7 +505,7 @@ static void Paint(HWND hWnd, HDC hdc)
 				 record[i].bw ? TEXT("黒") : TEXT("白"),
 				 record[i].x + 1,
 				 record[i].y + 1);
-		
+
 		TextOut(hdc,
 				gridBase*2 + gridSize * BOARD_SIZE + (100 * (i / 30)),
 				gridBase*2 + 17 * (i % 30 + 1),
@@ -520,7 +520,7 @@ static void Paint(HWND hWnd, HDC hdc)
 static void gameInitialize(HWND hWnd)
 {
 	bool	sente;
-	
+
 	// 初期化
 	format();
 
@@ -534,7 +534,7 @@ static void gameInitialize(HWND hWnd)
 
 		for (unsigned int i = 0; i < 2; ++i)
 			bwLog[i].resize(0);
-		
+
 	}else {
 		sente	= MessageBox(hWnd,
 							 TEXT("先攻（黒）でいいですか？"),
@@ -582,14 +582,14 @@ static void gameInitialize(HWND hWnd)
 static int gameEnd(HWND hWnd)
 {
 	TCHAR str[255];
-	
-	
+
+
 	//点数の表示
 	wsprintf(str
 			 , TEXT("黒:%d 対 白:%d\n"),
 			 pieceNum[BLACK],
 			 pieceNum[WHITE]);
-	
+
 	// 勝敗の表示
 	if (pieceNum[BLACK] > pieceNum[WHITE])
 	{
@@ -602,12 +602,12 @@ static int gameEnd(HWND hWnd)
 	else{
 		lstrcat(str, TEXT("引き分けです"));
 	}
-	
+
 	MessageBox(hWnd,
 			   str,
 			   TEXT("確認"),
 			   MB_OK | MB_ICONINFORMATION);
-	
+
 	return (0);
 }
 
@@ -627,7 +627,7 @@ static void Put(HWND hWnd, int x, int y)
 				   MB_OK | MB_ICONEXCLAMATION);
 		return;
 	}
-	
+
 	pieceNum[manColor]	+= num + 1;
 	pieceNum[comColor]	-= num;
 
@@ -647,7 +647,7 @@ static void Put(HWND hWnd, int x, int y)
 		gameEnd(hWnd);
 		return;
 	}
-   
+
 	if (!preCheck(comColor))
 	{
 		if (!preCheck(manColor))
@@ -661,7 +661,7 @@ static void Put(HWND hWnd, int x, int y)
 			gameEnd(hWnd);
 			return;
 		}
-		
+
 		//コンピュータにおく場所がないとき
 		MessageBox(hWnd,
 				   TEXT("相手には置けるところがありません"),
@@ -670,7 +670,7 @@ static void Put(HWND hWnd, int x, int y)
 
 		return;
 	}
-	
+
 	do{
 		int id = Cpu(comColor);
 
@@ -722,7 +722,7 @@ static LRESULT CALLBACK WindowProc(HWND   hWnd,
 	PAINTSTRUCT		ps;
 	POINT			pt;
 	int				x, y;
-  
+
 	switch (uMsg)
 	{
 		// 終了時.
@@ -771,7 +771,7 @@ static LRESULT CALLBACK WindowProc(HWND   hWnd,
 		// キー入力.
 	  case WM_KEYDOWN:
 		hdc = GetDC(hWnd);
-		
+
 		switch(wParam)
 		{
 			//マスの移動
@@ -784,25 +784,25 @@ static LRESULT CALLBACK WindowProc(HWND   hWnd,
 			if (manCursorY < BOARD_SIZE)
 				++manCursorY;
 			break;
-			
+
 		  case VK_RIGHT:
 			if (manCursorX < BOARD_SIZE)
 				++manCursorX;
 			break;
-			
+
 		  case VK_LEFT:
 			if (manCursorX > 0)
 				--manCursorX;
 			break;
-			
+
 		  case VK_RETURN: //駒をおく
 			pt.x	= gridBase + gridSize/2 + gridSize * manCursorX;
 			pt.y	= gridBase + gridSize/2 + gridSize * manCursorY;
-			
+
 			ClientToScreen(hWnd, &pt);
-			
+
 			SetCursorPos(pt.x, pt.y);
-			
+
 			Put(hWnd, manCursorX, manCursorY);
 
 			break;
@@ -810,7 +810,7 @@ static LRESULT CALLBACK WindowProc(HWND   hWnd,
 
 		pt.x	= gridBase + gridSize/2 + gridSize * manCursorX;
 		pt.y	= gridBase + gridSize/2 + gridSize * manCursorY;
-		
+
 		ClientToScreen(hWnd, &pt);
 
 		SetCursorPos(pt.x, pt.y);
@@ -822,28 +822,28 @@ static LRESULT CALLBACK WindowProc(HWND   hWnd,
 	  case WM_LBUTTONUP:
 		x = (LOWORD(lParam) - gridBase) / gridSize;
 		y = (HIWORD(lParam) - gridBase) / gridSize;
-		
-	
+
+
 		Put(hWnd, x, y);
-		
+
 		return (0);
 
 		// 描画.
 	  case WM_PAINT:
 		hdc	= BeginPaint(hWnd, &ps);
-		
+
 		Paint(hWnd, hdc);
-		
+
 		EndPaint(hWnd, &ps);
 		return (0);
-		
+
 		// メニュー.
 	  case WM_COMMAND:
 		switch(wParam)
 		{
 			//新規対戦
 		  case ID_MENU_NEW:
-			
+
 			InvalidateRect(hWnd, NULL, TRUE);
 
 			gameInitialize(hWnd);
@@ -851,7 +851,7 @@ static LRESULT CALLBACK WindowProc(HWND   hWnd,
 		}
 		return (0);
 	}
-	
+
 	return (DefWindowProc(hWnd, uMsg, wParam, lParam));
 }
 
@@ -885,33 +885,33 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd,int nShow)
 	if (strcmp(lpCmd, "learn") == 0)
 	{
 		int		bw;
-		
+
 		learn	= true;
 
 #if 0
 		for (int i = 0; i < 10; ++i)
 #endif
-		{ 
+		{
 			gameInitialize(0);
 			bw	= manColor;
-			
+
 			// 終了.
 			while (turn < (BOARD_SIZE*BOARD_SIZE-4))
 			{
 				CpuPut(Cpu(bw), bw);
-				
+
 				if (preCheck(SwapBW(bw)))
 					bw	= SwapBW(bw);
 			}
-			
+
 			if (pieceNum[BLACK] == pieceNum[WHITE])
 				return (0);
-			
+
 			teacherData	log(BOARD_SIZE*BOARD_SIZE*2,
 							BOARD_SIZE*BOARD_SIZE);
-			
+
 			log.Load("learning\\teacher.log");
-			
+
 			if (pieceNum[BLACK] > pieceNum[WHITE])
 			{
 				for (auto a : bwLog[BLACK])
@@ -922,12 +922,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd,int nShow)
 				for (auto a : bwLog[WHITE])
 					log.Add(a.input, a.id);
 			}
-			
+
 			log.Save("learning\\teacher.log");
 		}
 		return (0);
 	}
-	
+
 	wc.style			= CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc		= WindowProc;
 	wc.cbClsExtra		= 0;
@@ -938,19 +938,19 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd,int nShow)
 	wc.hbrBackground	= (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wc.lpszMenuName		= MAKEINTRESOURCE(IDR_MENU1);
 	wc.lpszClassName	= APP_NAME;
-	
+
 	if (!RegisterClass(&wc))
 		return (0);
-	
+
 	if ((g_hWnd = CreateWindow(APP_NAME, TEXT("OTHELLO"),
 							   WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 							   CW_USEDEFAULT, CW_USEDEFAULT,
 							   800, 640, NULL, NULL, hInst, NULL)) == NULL)
 		return (0);
-	
+
 	while(GetMessage(&msg, NULL, 0, 0) > 0)
 		DispatchMessage(&msg);
-	
+
 	return (msg.wParam);
 }
 

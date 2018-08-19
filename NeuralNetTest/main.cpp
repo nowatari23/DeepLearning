@@ -8,6 +8,7 @@
 
 #include "./NeuralNet.h"
 
+#include "NeuralNetCalc.cuh"
 
 /*----------------------------------------------------------------------
  *
@@ -15,15 +16,27 @@
 int main(void)
 {
 	NeuralNet	xorNet;
-	std::vector<double> input[2] = { 
+	std::vector<double> input[2] = {
 		{1.0, 0.0, 0.0,
 		 0.0, 0.0, 0.0,
 		 0.0, 0.0, 0.0 },
-	   { 0.0, 0.0, 0.0, 
+	   { 0.0, 0.0, 0.0,
 		 0.0, 0.0, 0.0,
 		 0.0, 0.0, 1.0 },
 	};
 	std::vector<double> teacher[2] = { {1.0}, {0.0}, };
+
+    std::vector<double> cuInput = {1.0, 2.0};
+    std::vector<double> cuWeight =
+      {
+        1.0, 2.0,
+        4.0, 2.0,
+        4.0, 8.0,
+      };
+    std::vector<double> cuOutput = {0.0, 0.0, 0.0f};
+
+    AffineForward(&cuOutput.front(), &cuInput.front(), &cuWeight.front(), 2, 3);
+
 
 #if 0
 	// 4x4x2 -> 3x3x1
@@ -60,7 +73,7 @@ int main(void)
 			xorNet.SetInput(input[i]);
 			xorNet.Forward();
 			xorNet.GetOutput(output[i]);
-			
+
 			double error	= xorNet.CalcLoss(teacher[i]);
 
 			std::cout << "{";
@@ -71,7 +84,7 @@ int main(void)
 
 			for (auto v : output[i])
 				std::cout << v << "," ;
-			
+
 			std::cout << "(";
 			for (auto v : teacher[i])
 				std::cout << v << ",";
